@@ -9,7 +9,7 @@ WINDOW_HEIGHT = 800
 # Config the snake 😅
 Snake.WIDTH = WINDOW_WIDTH // 40
 Snake.HEIGHT = WINDOW_HEIGHT // 40
-Snake.SPEED = 20 
+Snake.SPEED = 10 
 
 def generate_bonus(window, existant_bonus=None):
     # bonus_image = pygame.image.load('assets/egg.png')
@@ -41,8 +41,9 @@ def main():
     window.blit(bg_image, (0, 0))
     
     # create the head of the snake   
-    snake = Snake(WINDOW_WIDTH//2, WINDOW_HEIGHT//2, window)
     current_direction = Snake.UP
+    
+    snake = Snake(WINDOW_WIDTH//2, WINDOW_HEIGHT//2, window, current_direction)
     
     bonus = generate_bonus(window)
     is_bonus_taken = False
@@ -79,13 +80,16 @@ def main():
         
         bonus = generate_bonus(window, bonus)
         # if pygame.Rect.colliderect(bonus, snake.get_part(0)[0]):
-        if bonus.__eq__(snake.get_part(0)[0]):
-            snake.add_part(window, current_direction)
+        if bonus.__eq__(snake.get_part(0).get('position')):
+            snake.add_part(window)
             bonus = generate_bonus(window)
-        # generate_bonus(window)
+
+        # update only some region of the window 
+        
+        # pygame.display.update([snake.get_part(0)[0], snake.get_part(-1)[0]])
         pygame.display.flip()
         # wait a while to more smoothy
-        time.sleep(0.5)
+        time.sleep(0.2)
         
         
 if __name__ == '__main__':
