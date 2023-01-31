@@ -47,29 +47,38 @@ def handle_collision_with_borders(snake_parts: list):
     Args:
         snake_part (pygame.Rect): a part of snake
     """
-
     # depending on the border, recalculate the position of the part
-    print(len(snake_parts))
     for i in range(len(snake_parts)):
         part = snake_parts[i].get("position")
-        if part.colliderect(window_borders.get("top")):
+        if part.top < 0:
             part.top = WINDOW_HEIGHT
-            # print(part)
-        elif part.colliderect(window_borders.get("bottom")):
-            part.top = 0
-            # print(part)
-
-        elif part.colliderect(window_borders.get("left")):
+        elif part.top > WINDOW_HEIGHT:
+            part.top = -Snake.HEIGHT
+        elif part.left < 0:
             part.left = WINDOW_WIDTH
-            # print(part)
-
-        elif part.colliderect(window_borders.get("right")):
-            # print(part)
-            part.left = 0
+        elif part.left > WINDOW_WIDTH:
+            part.left = -Snake.WIDTH
         else:
             continue  # not really useful
 
         snake_parts[i]["position"] = part
+
+
+def lost(snake: Snake) -> bool:
+    """check if the snake beat itself
+
+    Args:
+        snake (Snake): snake object
+
+    Returns:
+        bool: the result
+    """
+
+    snake_head = snake.get_part(0).get("position")
+    for part in snake.body_parts[1::]:
+        if part.get("position").colliderect(snake_head):
+            return True
+    return False
 
 
 def main():
@@ -92,6 +101,7 @@ def main():
 
     bonus = generate_bonus(window)
 
+    score = 0
     # Game loop
     while True:
 
@@ -136,19 +146,31 @@ def main():
         snake.move(current_direction, window)
 
         bonus = generate_bonus(window, bonus)
-        # if pygame.Rect.colliderect(bonus, snake.get_part(0)[0]):
-        if bonus == snake.get_part(0).get("position"):
+
+        # TODO : Try to fix why sometimes the bonus cannot be taken, eventhough it's clear that the snake ate it
+        if equal_rect(bonus, snake.get_part(0).get("position")):
             snake.add_part(window)
             bonus = generate_bonus(window)
+            score += 10
+
+        if lost(snake):
+            print("YOU LOSE!!!!!!!!!!!!!", score)
+            pygame.quit()
 
         # borders collision problem
         handle_collision_with_borders(snake.body_parts)
 
         # TODO : fix the disappearance of some rect (just visualy) (randomly)
-        
+
         pygame.display.flip()
         # wait a while to more smoothy
         time.sleep(0.2)
+
+
+def equal_rect(rect1: pygame.Rect, rect2: pygame.Rect):
+    if rect1.top == rect2.top and rect1.left == rect2.left:
+        return True
+    return False
 
 
 if __name__ == "__main__":
