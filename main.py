@@ -1,6 +1,6 @@
 import time
-import pygame, sys, os
-from random import randint, randrange
+import pygame, sys
+from random import randrange
 from snake import Snake
 
 WINDOW_WIDTH = 800
@@ -9,7 +9,8 @@ WINDOW_HEIGHT = 800
 # Config the snake 😅
 Snake.WIDTH = WINDOW_WIDTH // 40
 Snake.HEIGHT = WINDOW_HEIGHT // 40
-Snake.SPEED = 10 
+# Snake.SPEED = 10 # problem that one; might be the same as a part size
+Snake.SPEED = Snake.WIDTH
 
 def generate_bonus(window, existant_bonus=None):
     # bonus_image = pygame.image.load('assets/egg.png')
@@ -28,7 +29,7 @@ def generate_bonus(window, existant_bonus=None):
 
 def main():
     """Runs the whole game
-    """
+"""
     
     # INITIALIZATION OF THE GAME 
     pygame.init()
@@ -57,30 +58,31 @@ def main():
     
             # Snake movements
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP and current_direction != Snake.UP:
+                if event.key == pygame.K_UP and (current_direction != Snake.UP and (current_direction != Snake.DOWN or len(snake.body_parts) == 1)):
                     snake.move(Snake.UP, window) 
                     current_direction = Snake.UP
                       
-                elif event.key == pygame.K_DOWN and current_direction != Snake.DOWN:
+                elif event.key == pygame.K_DOWN and (current_direction != Snake.DOWN and (current_direction != Snake.UP or len(snake.body_parts) == 1)):
                     snake.move(Snake.DOWN, window)
                     current_direction = Snake.DOWN
                     
-                elif event.key == pygame.K_LEFT and current_direction != Snake.LEFT:
+                elif event.key == pygame.K_LEFT and (current_direction != Snake.LEFT and (current_direction != Snake.RIGHT or len(snake.body_parts) == 1)):
                     snake.move(Snake.LEFT, window)
                     current_direction = Snake.LEFT
                     
-                elif event.key == pygame.K_RIGHT and current_direction != Snake.RIGHT:
+                elif event.key == pygame.K_RIGHT and (current_direction != Snake.RIGHT and (current_direction != Snake.LEFT or len(snake.body_parts) == 1)):
                     snake.move(Snake.RIGHT, window)
                     current_direction = Snake.RIGHT
         
         # add the grass background to the window 
         window.blit(bg_image, (0, 0))
-        # continuous movement
-        snake.move(current_direction, window)
+        # made the move unless it's an forbidden move
         
+        snake.move(current_direction, window)
+
         bonus = generate_bonus(window, bonus)
         # if pygame.Rect.colliderect(bonus, snake.get_part(0)[0]):
-        if bonus.__eq__(snake.get_part(0).get('position')):
+        if bonus == snake.get_part(0).get('position'):
             snake.add_part(window)
             bonus = generate_bonus(window)
 

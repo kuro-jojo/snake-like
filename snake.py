@@ -23,6 +23,7 @@ class Snake:
                                 'current_direction' : direction,
                                 'next_direction' : direction})
         
+        self.has_turned = False
 
     def get_part(self, index:int) -> dict:
         return self.body_parts[index]
@@ -89,16 +90,16 @@ class Snake:
         else:
             raise NotImplementedError('Direction not defined')
         
-        # change the color of the previous tail to black
-        if last_part != self.body_parts[0]:
-            last_part['color'] = 'black'
+        # # change the color of the previous tail to black
+        # if last_part != self.body_parts[0]:
+        #     last_part['color'] = 'black'
             
+        new_rect['color'] = Snake.TAIL_COLOR
         new_rect['current_direction'] = last_part_direction
         new_rect['next_direction'] = last_part_direction
-        new_rect['color'] = Snake.TAIL_COLOR
         
         self.body_parts.append(new_rect)
-        
+        print(self.body_parts)
         # pygame.draw.rect(window, Snake.TAIL_COLOR, new_rect)
         self.update(window)
         
@@ -109,29 +110,38 @@ class Snake:
             new_direction (str): direction in which the snake moves
             window (pygame.Surface): window frame
         """
-        
+                
         for i in range(len(self.body_parts)):
             part = self.body_parts[i]
             if i != 0:
-                previous_part = self.body_parts[i-1]
-                print(previous_part)
-                print(part)
-                print('*'*10)
+                front_part = self.body_parts[i-1]
+                
                 part['current_direction'] = part.get('next_direction')
                 # will replace the part in front of him on next move
-                part['next_direction'] = previous_part.get('current_direction') 
+                part['next_direction'] = front_part.get('current_direction') 
                 part['position'] = self.__move_part(part.get('position'), part.get('current_direction'))
+                # part['position'] = self.__move_part(part.get('position'), part.get('current_direction'), front_part.get('current_direction'))
                 
                 if i == len(self.body_parts) - 1:
                     part['color'] = Snake.TAIL_COLOR
                 else:
                     part['color'] = Snake.PART_COLOR
+                print(front_part)
+                print(part)
+                print('*'*10)
             else:
-                previous_part = self.body_parts[0]
+                front_part = self.body_parts[0]
+                if new_direction != front_part.get('current_direction'):
+                    self.has_turned = True
+                else:
+                    self.has_turned = False
+                    
                 part['current_direction'] = new_direction
                 part['next_direction'] = new_direction
-                part['position'] = self.__move_part(previous_part.get('position'), new_direction)
                 part['color'] = Snake.HEAD_COLOR
+                part['position'] = self.__move_part(front_part.get('position'), new_direction)
+                # part['position'] = self.__move_part(front_part.get('position'), new_direction, front_part.get('current_direction'))
+                
                 
             self.body_parts[i] = part
             
@@ -146,14 +156,23 @@ class Snake:
     def __move_part(self, previous_part:pygame.Rect, direction:str)->pygame.Rect:
         
         new_part = None
+        # TODO : with a speed different of the size of a part, what to do
+        new_speed = Snake.SPEED
+        # head_part = self.body_parts[0]
+        # if self.has_turned:
+        #     new_speed = Snake.WIDTH
+        #     print(direction, next_part_direction)
+        # else:
+        #     new_speed = Snake.SPEED
+            
         if direction is Snake.UP:
-            new_part = pygame.Rect(previous_part.left, previous_part.top - Snake.SPEED, previous_part.width, previous_part.height)
+            new_part = pygame.Rect(previous_part.left, previous_part.top - new_speed, previous_part.width, previous_part.height)
         elif direction is Snake.DOWN:
-            new_part = pygame.Rect(previous_part.left, previous_part.top + Snake.SPEED, previous_part.width, previous_part.height)
+            new_part = pygame.Rect(previous_part.left, previous_part.top + new_speed, previous_part.width, previous_part.height)
         elif direction is Snake.LEFT:
-            new_part = pygame.Rect(previous_part.left - Snake.SPEED, previous_part.top, previous_part.width, previous_part.height)
+            new_part = pygame.Rect(previous_part.left - new_speed, previous_part.top, previous_part.width, previous_part.height)
         elif direction is Snake.RIGHT:
-            new_part = pygame.Rect(previous_part.left + Snake.SPEED, previous_part.top, previous_part.width, previous_part.height)
+            new_part = pygame.Rect(previous_part.left + new_speed, previous_part.top, previous_part.width, previous_part.height)
         else:
             raise NotImplementedError('Direction not defined')
         
